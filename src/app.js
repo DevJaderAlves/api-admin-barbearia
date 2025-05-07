@@ -6,12 +6,15 @@ const funcionarioRoutes = require('./routes/funcionarioRoutes');
 const agendamentoRoutes = require('./routes/agendamentoRoutes');
 const bloqueioRoutes = require('./routes/bloqueioRoutes');
 const authRoutes = require('./routes/authRoutes');
+const authRoutes = require('./routes/auth');
 const authenticateToken = require('./middleware/authMiddleware');
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
+
+app.use('/api', authRoutes);
 
 app.use('/api/auth', authRoutes);
 app.use('/api/funcionarios', authenticateToken, funcionarioRoutes);
