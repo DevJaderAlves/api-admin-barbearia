@@ -1,5 +1,4 @@
-
-const prisma = require('../prismaClient');
+const connection = require('../database/connection');
 
 exports.bloquearDia = async (req, res) => {
   const { data } = req.body;
@@ -9,19 +8,21 @@ exports.bloquearDia = async (req, res) => {
   }
 
   try {
-    const bloqueioExistente = await prisma.bloqueioDia.findFirst({
-      where: { data }
-    });
+    const [existente] = await connection.execute(
+      'SELECT * FROM BloqueioDia WHERE data = ?',
+      [data]
+    );
 
-    if (bloqueioExistente) {
+    if (existente.length > 0) {
       return res.status(400).json({ error: 'Esse dia já está bloqueado.' });
     }
 
-    const novoBloqueio = await prisma.bloqueioDia.create({
-      data: { data }
-    });
+    const [result] = await connection.execute(
+      'INSERT INTO BloqueioDia (data) VALUES (?)',
+      [data]
+    );
 
-    res.status(201).json(novoBloqueio);
+    res.status(201).json({ id: result.insertId, data });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Erro ao bloquear dia.' });
@@ -30,8 +31,8 @@ exports.bloquearDia = async (req, res) => {
 
 exports.listarDiasBloqueados = async (req, res) => {
   try {
-    const dias = await prisma.bloqueioDia.findMany();
-    res.json(dias);
+    const [rows] = await connection.execute('SELECT * FROM BloqueioDia ORDER BY data ASC');
+    res.json(rows);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Erro ao listar dias bloqueados.' });
@@ -42,7 +43,7 @@ exports.desbloquearDia = async (req, res) => {
   const { id } = req.params;
 
   try {
-    await prisma.bloqueioDia.delete({ where: { id: Number(id) } });
+    await connection.execute('DELETE FROM BloqueioDia WHERE id = ?', [id]);
     res.status(204).end();
   } catch (error) {
     console.error(error);
@@ -58,19 +59,21 @@ exports.bloquearHorario = async (req, res) => {
   }
 
   try {
-    const bloqueioExistente = await prisma.bloqueioHorario.findFirst({
-      where: { data, horario }
-    });
+    const [existente] = await connection.execute(
+      'SELECT * FROM BloqueioHorario WHERE data = ? AND horario = ?',
+      [data, horario]
+    );
 
-    if (bloqueioExistente) {
+    if (existente.length > 0) {
       return res.status(400).json({ error: 'Esse horário já está bloqueado.' });
     }
 
-    const novoBloqueio = await prisma.bloqueioHorario.create({
-      data: { data, horario }
-    });
+    const [result] = await connection.execute(
+      'INSERT INTO BloqueioHorario (data, horario) VALUES (?, ?)',
+      [data, horario]
+    );
 
-    res.status(201).json(novoBloqueio);
+    res.status(201).json({ id: result.insertId, data, horario });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Erro ao bloquear horário.' });
@@ -79,8 +82,8 @@ exports.bloquearHorario = async (req, res) => {
 
 exports.listarHorariosBloqueados = async (req, res) => {
   try {
-    const horarios = await prisma.bloqueioHorario.findMany();
-    res.json(horarios);
+    const [rows] = await connection.execute('SELECT * FROM BloqueioHorario ORDER BY data ASC, horario ASC');
+    res.json(rows);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Erro ao listar horários bloqueados.' });
@@ -91,10 +94,11 @@ exports.desbloquearHorario = async (req, res) => {
   const { id } = req.params;
 
   try {
-    await prisma.bloqueioHorario.delete({ where: { id: Number(id) } });
+    await connection.execute('DELETE FROM BloqueioHorario WHERE id = ?', [id]);
     res.status(204).end();
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Erro ao desbloquear horário.' });
   }
 };
+
