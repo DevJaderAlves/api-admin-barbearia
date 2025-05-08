@@ -4,7 +4,7 @@ const connection = require('../database/connection');
 const criarAgendamento = async (req, res) => {
     const { nome_cliente, telefone_cliente, servico, data, horario } = req.body;
 
-    if (!nome_cliente || !telefone_cliente || !servico || !funcionario_id || !data || !horario) {
+    if (!nome_cliente || !telefone_cliente || !servico || !data || !horario) {
         return res.status(400).json({ error: 'Todos os campos são obrigatórios.' });
     }
 
