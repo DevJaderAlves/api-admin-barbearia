@@ -5,9 +5,6 @@ const authMiddleware = require('../middleware/authMiddleware'); // <-- adicionar
 
 router.use(authMiddleware); // <-- proteger todas as rotas abaixo
 
-// Listar agendamentos por funcionário
-router.get('/', agendamentoController.listarAgendamentosPorFuncionario);
-
 // Criar novo agendamento
 router.post('/', agendamentoController.criarAgendamento);
 

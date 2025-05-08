@@ -2,7 +2,7 @@ const connection = require('../database/connection');
 
 // Criar novo agendamento
 const criarAgendamento = async (req, res) => {
-    const { nome_cliente, telefone_cliente, servico, funcionario_id, data, horario } = req.body;
+    const { nome_cliente, telefone_cliente, servico, data, horario } = req.body;
 
     if (!nome_cliente || !telefone_cliente || !servico || !funcionario_id || !data || !horario) {
         return res.status(400).json({ error: 'Todos os campos são obrigatórios.' });
@@ -11,40 +11,18 @@ const criarAgendamento = async (req, res) => {
     try {
         const [result] = await connection.execute(
             `INSERT INTO Agendamentos 
-             (nome_cliente, telefone_cliente, servico, funcionario_id, data, horario) 
+             (nome_cliente, telefone_cliente, servico, data, horario) 
              VALUES (?, ?, ?, ?, ?, ?)`,
-            [nome_cliente, telefone_cliente, servico, funcionario_id, data, horario]
+            [nome_cliente, telefone_cliente, servico, data, horario]
         );
 
-        return res.status(201).json({ id: result.insertId, nome_cliente, telefone_cliente, servico, funcionario_id, data, horario });
+        return res.status(201).json({ id: result.insertId, nome_cliente, telefone_cliente, servico, data, horario });
     } catch (error) {
         console.error('Erro ao criar agendamento:', error);
         return res.status(500).json({ error: 'Erro interno do servidor.' });
     }
 };
 
-// Listar agendamentos de um funcionário
-const listarAgendamentosPorFuncionario = async (req, res) => {
-    const { funcionario_id } = req.query;
-
-    if (!funcionario_id) {
-        return res.status(400).json({ error: 'ID do funcionário é obrigatório.' });
-    }
-
-    try {
-        const [rows] = await connection.execute(
-            `SELECT * FROM Agendamentos 
-             WHERE funcionario_id = ?
-             ORDER BY data ASC, horario ASC`,
-            [funcionario_id]
-        );
-
-        return res.status(200).json(rows);
-    } catch (error) {
-        console.error('Erro ao listar agendamentos:', error);
-        return res.status(500).json({ error: 'Erro interno do servidor.' });
-    }
-};
 
 // Deletar agendamento
 const deletarAgendamento = async (req, res) => {
@@ -102,7 +80,6 @@ const listarTodosAgendamentos = async (req, res) => {
 
 module.exports = {
     criarAgendamento,
-    listarAgendamentosPorFuncionario,
     deletarAgendamento,
     atualizarStatusAgendamento,
     listarTodosAgendamentos
